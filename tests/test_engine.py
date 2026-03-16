@@ -180,6 +180,40 @@ class TestReconcileEngine(unittest.TestCase):
         self.assertEqual(result["created"], 1)
         self.assertEqual(result["reflected_skipped"], 1)
 
+    def test_reflection_prevention_full_detail(self) -> None:
+        """Full-detail mapping should also skip events synced FROM the target account."""
+        # Source (msgraph work) has a busy block that was synced FROM personal (google hub)
+        synced_from_hub = make_event("s1", "Busy")
+        meta = {
+            "srcProvider": "google",
+            "srcAccount": "hub@gmail.com",
+            "srcCalendar": "primary",
+            "srcEventId": "personal1",
+            "syncType": "busy-block",
+            "mappingName": "personal-to-work",
+            "srcHash": _hash_event(synced_from_hub),
+            "syncedAt": "2030-01-01T12:00:00Z",
+            "version": 2,
+        }
+        synced_from_hub = Event(
+            event_id=synced_from_hub.event_id,
+            summary=synced_from_hub.summary,
+            start=synced_from_hub.start,
+            end=synced_from_hub.end,
+            description=append_syncv2("", meta),
+            show_as=synced_from_hub.show_as,
+            raw={},
+        )
+
+        # Also a real work event
+        real_work_event = make_event("s2", "Team Standup", hours_from_now=5)
+
+        providers = self._make_providers([synced_from_hub, real_work_event], [])
+        result = reconcile_mapping(MAPPING, providers, dry_run=False, max_changes=50)
+        # Should only create the real work event, NOT the busy block from hub
+        self.assertEqual(result["created"], 1)
+        self.assertEqual(result["reflected_skipped"], 1)
+
     def test_busy_block_creates_private_event(self) -> None:
         src = [make_event("s1", "Personal Dinner")]
         src_provider: MagicMock = MagicMock()

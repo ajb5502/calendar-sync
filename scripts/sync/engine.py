@@ -154,19 +154,18 @@ def reconcile_mapping(
         if meta and meta.get("mappingName") == mapping_name:
             managed[meta["srcEventId"]] = (te, meta)
 
-    # Reflection prevention for busy-block
+    # Reflection prevention — skip source events that were synced FROM the target
+    # account (prevents A→B→A echo loops). Applies to ALL mapping types.
     reflected_skipped = 0
-    if sync_type == "busy-block":
-        tgt_account = tgt_conf["account"]
-        non_reflected: list[Event] = []
-        for se in source_events:
-            # Check if this source event was synced FROM the target account
-            se_meta = decode_syncv2(se.description)
-            if se_meta and se_meta.get("srcAccount") == tgt_account:
-                reflected_skipped += 1
-                continue
-            non_reflected.append(se)
-        source_events = non_reflected
+    tgt_account = tgt_conf["account"]
+    non_reflected: list[Event] = []
+    for se in source_events:
+        se_meta = decode_syncv2(se.description)
+        if se_meta and se_meta.get("srcAccount") == tgt_account:
+            reflected_skipped += 1
+            continue
+        non_reflected.append(se)
+    source_events = non_reflected
 
     # Build diff
     to_create: list[tuple[Event, str]] = []
