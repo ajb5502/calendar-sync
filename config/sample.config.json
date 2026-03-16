@@ -59,7 +59,8 @@
         "summary": "Busy",
         "visibility": "private",
         "showAs": "busy"
-      }
+      },
+      "_hold_options": "summary: set to 'Busy' for full privacy, or remove to use the source event title (you see the detail, shared viewers see 'Busy' due to private visibility)"
     }
   ],
   "safety": {

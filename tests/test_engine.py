@@ -79,7 +79,7 @@ BUSY_MAPPING = {
     "source": {"provider": "google", "account": "hub@gmail.com", "calendarId": "primary"},
     "target": {"provider": "msgraph", "account": "work@company.com", "calendarId": "primary"},
     "lookaheadDays": 30,
-    "hold": {"summary": "Busy", "visibility": "private", "showAs": "busy"},
+    "hold": {"visibility": "private", "showAs": "busy"},
 }
 
 
@@ -226,8 +226,8 @@ class TestReconcileEngine(unittest.TestCase):
         reconcile_mapping(BUSY_MAPPING, providers, dry_run=False, max_changes=50)
         # Check the event passed to create_event
         created_event = tgt_provider.create_event.call_args[0][2]
-        self.assertEqual(created_event.summary, "Busy")
-        self.assertEqual(created_event.visibility, "private")
+        self.assertEqual(created_event.summary, "Personal Dinner")  # source title, not "Busy"
+        self.assertEqual(created_event.visibility, "private")  # private so shared viewers see "Busy"
 
     def test_ignores_other_mapping_events(self) -> None:
         """Engine should not delete managed events from a different mapping."""

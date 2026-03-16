@@ -65,8 +65,19 @@ Add to your `openclaw.json` under `skills.entries`:
 | Type | Direction | What syncs | Example |
 |------|-----------|------------|---------|
 | `full-detail` | Work → Hub | Full event details (title, description, location, attendees, meeting links) | Outlook → Gmail |
-| `busy-block` | Hub → Work | Private "Busy" placeholder (hides personal details) | Gmail → Outlook |
+| `busy-block` | Hub → Work | Private event on work calendar (see hold options below) | Gmail → Outlook |
 | `filtered-copy` | Shared → Hub | Only events matching a filter (e.g., summary prefix) | Family cal → Personal sub-calendar |
+
+### Busy Block Hold Options
+
+The `hold` config on busy-block mappings controls what appears on the target calendar:
+
+| Option | Behavior |
+|--------|----------|
+| `"summary": "Busy"` | Everyone sees "Busy" (maximum privacy) |
+| No `summary` field | You see the real event title; shared calendar viewers see "Busy" (via `visibility: private`) |
+| `"visibility": "private"` | Shared viewers see "Busy" regardless of summary |
+| `"showAs": "busy"` | Time shows as unavailable in scheduling |
 
 ## Commands
 

@@ -46,7 +46,7 @@ def _build_target_event(source: Event, mapping: dict[str, Any]) -> Event:
         show_as: str = hold.get("showAs", "busy")
         return Event(
             event_id="",
-            summary=hold.get("summary", "Busy"),
+            summary=hold.get("summary") or source.summary,
             start=source.start,
             end=source.end,
             visibility=hold.get("visibility", "private"),
