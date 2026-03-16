@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import subprocess
 import time
 import urllib.error
@@ -126,7 +127,7 @@ class MSGraphProvider(CalendarProvider):
         max_retries: int = 3,
         backoff: list[int] | None = None,
     ) -> None:
-        self.token_script = token_script
+        self.token_script = os.path.expanduser(token_script)
         self.max_retries = max_retries
         self.backoff = backoff if backoff is not None else [2, 4, 8]
         self._creds_map: dict[str, str] = {}
@@ -139,7 +140,7 @@ class MSGraphProvider(CalendarProvider):
         """Look up credentials file path for an account."""
         if account not in self._creds_map:
             raise ValueError(f"No credentials configured for account: {account}")
-        return self._creds_map[account]
+        return os.path.expanduser(self._creds_map[account])
 
     def _get_token(self, account: str, creds_file: str) -> str:
         """Get access token by calling the token management script."""
@@ -206,7 +207,9 @@ class MSGraphProvider(CalendarProvider):
         creds_file = self._resolve_creds(account)
         token = self._get_token(account, creds_file)
 
-        params = f"startDateTime={start.isoformat()}Z&endDateTime={end.isoformat()}Z&$top=500"
+        start_str = start.strftime("%Y-%m-%dT%H:%M:%SZ")
+        end_str = end.strftime("%Y-%m-%dT%H:%M:%SZ")
+        params = f"startDateTime={start_str}&endDateTime={end_str}&$top=500"
 
         if calendar_id == "primary" or not calendar_id:
             url: str | None = f"{BASE_URL}/me/calendarView?{params}"
