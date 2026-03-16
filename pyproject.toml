@@ -1,0 +1,53 @@
+[project]
+name = "calendar-sync"
+version = "1.0.0"
+requires-python = ">=3.9"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["scripts"]
+markers = [
+    "unit: Fast tests with mocked dependencies (default)",
+    "integration: Tests that hit real APIs (gog CLI, MS Graph)",
+    "smoke: Lightweight real-API validation for drift detection",
+]
+addopts = "-m 'not integration and not smoke' --tb=short -q"
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+# Allow gradual adoption — these can be tightened later
+disallow_any_generics = false
+mypy_path = "scripts"
+explicit_package_bases = true
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # bugbear
+    "SIM",  # simplify
+    "RUF",  # ruff-specific
+]
+ignore = [
+    "E501",  # line length handled by formatter
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["providers", "sync", "notify", "setup", "state", "cli"]

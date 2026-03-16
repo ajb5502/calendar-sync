@@ -1,0 +1,80 @@
+{
+  "_comment": "Sample calendar-sync config. Copy to ~/.openclaw/calendar-sync.json and fill in your details.",
+  "version": 1,
+  "hub": {
+    "provider": "google",
+    "account": "your-personal@gmail.com",
+    "calendarId": "primary"
+  },
+  "providers": {
+    "google": {
+      "accounts": ["your-personal@gmail.com"],
+      "gogBinary": "gog"
+    },
+    "msgraph": {
+      "accounts": [
+        {
+          "email": "you@company.com",
+          "credentialsFile": "~/.openclaw/credentials/company-azure.json"
+        }
+      ],
+      "tokenScript": "~/.openclaw/scripts/ms-graph-auth.py",
+      "disableTelemetry": true
+    }
+  },
+  "mappings": [
+    {
+      "name": "work-to-personal",
+      "type": "full-detail",
+      "source": {
+        "provider": "msgraph",
+        "account": "you@company.com",
+        "calendarId": "primary"
+      },
+      "target": {
+        "provider": "google",
+        "account": "your-personal@gmail.com",
+        "calendarId": "primary"
+      },
+      "lookaheadDays": 30,
+      "skipDeclined": true,
+      "allDayMode": "free",
+      "color": { "google": "6" }
+    },
+    {
+      "name": "personal-to-work",
+      "type": "busy-block",
+      "source": {
+        "provider": "google",
+        "account": "your-personal@gmail.com",
+        "calendarId": "primary"
+      },
+      "target": {
+        "provider": "msgraph",
+        "account": "you@company.com",
+        "calendarId": "primary"
+      },
+      "lookaheadDays": 30,
+      "hold": {
+        "summary": "Busy",
+        "visibility": "private",
+        "showAs": "busy"
+      }
+    }
+  ],
+  "safety": {
+    "maxChangesPerRun": 50,
+    "maxEventsPerMapping": 500,
+    "dryRun": false
+  },
+  "retry": {
+    "maxRetries": 3,
+    "backoffSeconds": [2, 4, 8]
+  },
+  "notifications": {
+    "method": "stdout"
+  },
+  "state": {
+    "file": "~/.openclaw/calendar-sync-state.json"
+  }
+}
