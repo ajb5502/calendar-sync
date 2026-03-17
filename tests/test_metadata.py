@@ -79,7 +79,8 @@ class TestHashIgnoresKeyOrder:
 class TestAppendToDescription:
     def test_append(self) -> None:
         result = append_syncv2("Team meeting", SAMPLE_META)
-        assert result.startswith("Team meeting\n---\nSYNCV2:")
+        assert result.startswith("SYNCV2:")
+        assert "Team meeting" in result
         decoded = decode_syncv2(result)
         assert decoded == SAMPLE_META
 

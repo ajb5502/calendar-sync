@@ -90,7 +90,8 @@ def reconcile_mapping(
     max_changes: int,
 ) -> dict[str, Any]:
     """Run reconcile for one mapping. Returns stats dict."""
-    now = datetime.now(timezone.utc)
+    now_utc = datetime.now(timezone.utc)
+    now = now_utc.replace(tzinfo=None)  # naive UTC — providers return naive datetimes
     lookahead = timedelta(days=mapping.get("lookaheadDays", 30))
     start = now
     end = now + lookahead
@@ -188,7 +189,8 @@ def reconcile_mapping(
 
     # Stale detection: managed events whose source is gone AND within lookahead
     for src_event_id, (tgt_event, _meta) in managed.items():
-        if src_event_id not in source_by_id and tgt_event.end >= start:
+        tgt_end = tgt_event.end.replace(tzinfo=None) if tgt_event.end.tzinfo else tgt_event.end
+        if src_event_id not in source_by_id and tgt_end >= start:
             to_delete.append(tgt_event)
 
     # Apply changes respecting max_changes
@@ -221,7 +223,7 @@ def reconcile_mapping(
             "syncType": sync_type if sync_type != "filtered-copy" else mapping.get("syncMode", "full-detail"),
             "mappingName": mapping_name,
             "srcHash": src_hash,
-            "syncedAt": now.isoformat(),
+            "syncedAt": now_utc.isoformat(),
             "version": 2,
         }
         target_event.description = append_syncv2(target_event.description, meta_dict)
@@ -244,7 +246,7 @@ def reconcile_mapping(
             "syncType": sync_type if sync_type != "filtered-copy" else mapping.get("syncMode", "full-detail"),
             "mappingName": mapping_name,
             "srcHash": src_hash,
-            "syncedAt": now.isoformat(),
+            "syncedAt": now_utc.isoformat(),
             "version": 2,
         }
         target_event.description = append_syncv2(target_event.description, meta_dict)

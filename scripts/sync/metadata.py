@@ -42,18 +42,18 @@ def compute_hash(fields: dict) -> str:
 
 
 def append_syncv2(description: str | None, meta: dict) -> str:
-    """Appends \\n---\\nSYNCV2:... to description."""
+    """Prepends SYNCV2:...\\n---\\n to description to survive truncation."""
     tag = encode_syncv2(meta)
     desc = description or ""
-    return f"{desc}\n---\n{tag}"
+    return f"{tag}\n---\n{desc}"
 
 
 def strip_syncv2(description: str | None) -> str:
     """Removes SYNCV2 tag + separator, returns clean description."""
     if not description:
         return ""
-    # Remove the separator line and SYNCV2 tag
-    result = re.sub(r"\n---\nSYNCV2:[A-Za-z0-9_-]+={0,2}", "", description)
-    # Also handle case where tag appears without separator
+    # Remove SYNCV2 tag + separator (handles both prepend and append positions)
+    result = re.sub(r"SYNCV2:[A-Za-z0-9_-]+={0,2}\n---\n?", "", description)
+    result = re.sub(r"\n---\nSYNCV2:[A-Za-z0-9_-]+={0,2}", "", result)
     result = SYNCV2_PATTERN.sub("", result)
     return result.strip()
