@@ -111,6 +111,27 @@ Work Outlook B ────→ Hub ─────→ Work Outlook B
 Family Calendar ───→ Hub (filtered-copy, prefix match)
 ```
 
+## Known Issues & Lessons Learned
+
+These were discovered during production deployment and are now fixed:
+
+| Issue | Root Cause | Fix |
+|-------|-----------|-----|
+| **MS Graph 400 on calendarView** | `datetime.isoformat()` on UTC-aware datetime produces `+00:00`, not `Z` | Use `strftime("%Y-%m-%dT%H:%M:%SZ")` |
+| **gog 400 on all-day events** | All-day events need `--from`/`--to` in `YYYY-MM-DD` format, not datetime | Check `is_all_day` and use date-only format |
+| **SYNCV2 tag lost on long descriptions** | Google Calendar truncates descriptions at ~8192 chars; HTML from MS Graph is huge | Prepend SYNCV2 tag instead of appending |
+| **Echo loops (A→B→A duplication)** | Reflection prevention only applied to busy-block mappings | Apply to all mapping types |
+| **Tilde paths not expanding** | `subprocess.run` doesn't expand `~` in arguments | `os.path.expanduser()` on all config paths |
+| **Naive vs aware datetime comparison** | gog returns naive datetimes, engine uses aware `datetime.now(timezone.utc)` | Normalize to naive UTC in engine |
+
+### Tips for Deployers
+
+- **Disconnect existing sync tools first** (e.g., Calendar Bridge) before running initial sync — overlapping sync tools create duplicates
+- **Run dry-run before live sync** to verify event counts look reasonable
+- **Check idempotency** after first sync: run `reconcile --all --dry-run` — should show `+0 ~0 -0`
+- **Set cron timeout to 120s+** — the agent needs time to spawn, load context, and run the script
+- **All-day events from MS Graph** come with `00:00:00` times — the provider handles format conversion automatically
+
 ## License
 
 MIT — see [LICENSE](LICENSE)
