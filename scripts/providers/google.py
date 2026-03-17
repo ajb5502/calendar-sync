@@ -141,8 +141,12 @@ class GoogleProvider(CalendarProvider):
         return [_parse_event(item) for item in items]
 
     def create_event(self, account: str, calendar_id: str, event: Event) -> str:
-        start_rfc = event.start.strftime("%Y-%m-%dT%H:%M:%SZ")
-        end_rfc = event.end.strftime("%Y-%m-%dT%H:%M:%SZ")
+        if event.is_all_day:
+            start_rfc = event.start.strftime("%Y-%m-%d")
+            end_rfc = event.end.strftime("%Y-%m-%d")
+        else:
+            start_rfc = event.start.strftime("%Y-%m-%dT%H:%M:%SZ")
+            end_rfc = event.end.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         args = [
             "calendar",
@@ -185,8 +189,12 @@ class GoogleProvider(CalendarProvider):
         event_id: str,
         event: Event,
     ) -> None:
-        start_rfc = event.start.strftime("%Y-%m-%dT%H:%M:%SZ")
-        end_rfc = event.end.strftime("%Y-%m-%dT%H:%M:%SZ")
+        if event.is_all_day:
+            start_rfc = event.start.strftime("%Y-%m-%d")
+            end_rfc = event.end.strftime("%Y-%m-%d")
+        else:
+            start_rfc = event.start.strftime("%Y-%m-%dT%H:%M:%SZ")
+            end_rfc = event.end.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         args = [
             "calendar",
