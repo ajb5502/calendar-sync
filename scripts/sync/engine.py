@@ -22,6 +22,7 @@ def _hash_event(event: Event) -> str:
         "is_all_day": str(event.is_all_day),
         "attendees": ",".join(sorted(event.attendees)),
         "meeting_link": event.meeting_link,
+        "event_type": event.raw.get("eventType", "default"),
     }
     return compute_hash(fields)
 
@@ -43,10 +44,16 @@ def _build_target_event(source: Event, mapping: dict[str, Any]) -> Event:
 
     if sync_type == "busy-block":
         hold = mapping.get("hold", {})
-        show_as: str = hold.get("showAs", "busy")
+        is_task = source.raw.get("eventType") == "focusTime"
+        if hold.get("labelTasks") and is_task:
+            summary = f"Task: {source.summary}"
+            show_as: str = source.show_as
+        else:
+            summary = hold.get("summary") or source.summary
+            show_as = hold.get("showAs", "busy")
         return Event(
             event_id="",
-            summary=hold.get("summary") or source.summary,
+            summary=summary,
             start=source.start,
             end=source.end,
             visibility=hold.get("visibility", "private"),

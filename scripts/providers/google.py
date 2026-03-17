@@ -211,6 +211,8 @@ class GoogleProvider(CalendarProvider):
             end_rfc,
         ]
 
+        if event.is_all_day:
+            args.append("--all-day")
         if event.description:
             args.extend(["--description", event.description])
         if event.location:
