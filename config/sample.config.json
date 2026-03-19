@@ -44,29 +44,39 @@
     {
       "name": "personal-to-work",
       "type": "busy-block",
-      "source": {
-        "provider": "google",
-        "account": "your-personal@gmail.com",
-        "calendarId": "primary"
-      },
+      "sources": [
+        {
+          "provider": "google",
+          "account": "your-personal@gmail.com",
+          "calendarId": "primary"
+        },
+        {
+          "_comment": "Include sub-calendars (e.g. family filtered-copy target) so they show as busy on work",
+          "provider": "google",
+          "account": "your-personal@gmail.com",
+          "calendarId": "your-subcal-id@group.calendar.google.com"
+        }
+      ],
       "target": {
         "provider": "msgraph",
         "account": "you@company.com",
         "calendarId": "primary"
       },
       "lookaheadDays": 30,
+      "maxEventsPerMapping": 2000,
       "hold": {
-        "summary": "Busy",
         "visibility": "private",
-        "showAs": "busy"
+        "showAs": "busy",
+        "labelTasks": true
       },
-      "_hold_options": "summary: set to 'Busy' for full privacy, or remove to use the source event title (you see the detail, shared viewers see 'Busy' due to private visibility)"
+      "_hold_options": "Remove 'summary' to use the source event title (you see the detail, shared viewers see 'Busy' due to private visibility). Set 'labelTasks: true' to sync Google Tasks time blocks as 'Task: <title>'."
     }
   ],
   "safety": {
-    "maxChangesPerRun": 50,
-    "maxEventsPerMapping": 500,
-    "dryRun": false
+    "maxChangesPerRun": 250,
+    "maxEventsPerMapping": 2000,
+    "dryRun": false,
+    "_note": "maxEventsPerMapping must also be set on each mapping (engine reads from mapping, not global). This global value is for documentation only until the engine fallback is implemented."
   },
   "retry": {
     "maxRetries": 3,
