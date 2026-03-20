@@ -89,7 +89,7 @@ def cmd_reconcile(args: argparse.Namespace) -> None:
     for mapping in mappings:
         name = mapping["name"]
         try:
-            result = reconcile_mapping(mapping, providers, dry_run=dry_run, max_changes=max_changes)
+            result = reconcile_mapping(mapping, providers, dry_run=dry_run, max_changes=max_changes, safety_config=config.get("safety"))
             results.append(result)
             if not dry_run:
                 state.record_sync(
@@ -163,7 +163,7 @@ def cmd_diff(args: argparse.Namespace) -> None:
         sys.exit(1)
 
     providers = _init_providers(config)
-    result = reconcile_mapping(m, providers, dry_run=True, max_changes=999999)
+    result = reconcile_mapping(m, providers, dry_run=True, max_changes=999999, safety_config=config.get("safety"))
     print(f"Diff for '{args.mapping}':")
     print(f"  Would create: {result['created']}")
     print(f"  Would update: {result['updated']}")

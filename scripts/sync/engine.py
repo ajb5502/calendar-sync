@@ -95,6 +95,7 @@ def reconcile_mapping(
     providers: dict[str, Any],
     dry_run: bool,
     max_changes: int,
+    safety_config: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run reconcile for one mapping. Returns stats dict."""
     now_utc = datetime.now(timezone.utc)
@@ -113,7 +114,8 @@ def reconcile_mapping(
     elif "sources" in mapping:
         sources_config = mapping["sources"]
 
-    max_events: int = mapping.get("maxEventsPerMapping", 500)
+    global_max = (safety_config or {}).get("maxEventsPerMapping", 500)
+    max_events: int = mapping.get("maxEventsPerMapping", global_max)
     source_events: list[Event] = []
     # Track source info per event_id (provider, account, calendarId)
     src_info: dict[str, tuple[str, str, str]] = {}
